@@ -4,7 +4,7 @@
 import sys
 import os
 
-import path_setter as ps
+import openmeeg_path_setter as ps
 
 #
 import openmeeg as om
