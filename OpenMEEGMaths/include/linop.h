@@ -65,8 +65,8 @@ namespace OpenMEEG {
 
         typedef maths::MathsIO* IO;
 
-        typedef enum { FULL, SYMMETRIC, SPARSE } StorageType;
-        typedef unsigned                         Dimension;
+        typedef enum { FULL, SYMMETRIC, BLOCK, SPARSE } StorageType;
+        typedef unsigned                                Dimension;
 
         LinOpInfo() { }
         LinOpInfo(const size_t m,const size_t n,const StorageType st,const Dimension d):
