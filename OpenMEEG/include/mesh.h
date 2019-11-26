@@ -54,6 +54,7 @@ knowledge of the CeCILL-B license and that you accept its terms.
 #include <IOUtils.H>
 #include <om_utils.h>
 #include <sparse_matrix.h>
+#include <block_matrix.h>
 
 #ifdef USE_VTK
 #include <vtkPolyData.h>
@@ -77,10 +78,10 @@ namespace OpenMEEG {
 
     enum Filetype { VTK, TRI, BND, MESH, OFF, GIFTI };
 
-    /**
-        Mesh class
-        \brief Mesh is a collection of triangles
-    */
+    using maths::Range;
+
+    /// Mesh class
+    /// \brief Mesh is a collection of triangles
 
     class OPENMEEG_EXPORT Mesh {
     public:
@@ -153,8 +154,8 @@ namespace OpenMEEG {
         bool operator!=(const Mesh& m) const { return triangles()!=m.triangles(); }
 
         /// \brief Print info
-        ///  Print to std::cout some info about the mesh
-        ///  \return void \sa */
+        /// Print to std::cout some info about the mesh
+        /// \return void \sa
 
         void info(const bool verbose=false) const; ///< \brief Print mesh information.
         bool has_self_intersection() const; ///< \brief Check whether the mesh self-intersects.
@@ -164,6 +165,27 @@ namespace OpenMEEG {
         void generate_indices(); ///< \brief Generate indices (if allocate).
         void update(); ///< \brief Recompute triangles normals, area, and links.
         void merge(const Mesh&,const Mesh&); ///< Merge two meshes.
+
+        /// \brief Get the ranges of the specific mesh in the global matrix.
+
+        std::vector<Range> vertices_ranges() const {
+            std::vector<size_t> indices;
+            for (const auto& vertex : vertices())
+                indices.push_back(vertex->index());
+            std::sort(indices.begin(),indices.end());
+            std::vector<Range> result;
+            for (auto it=indices.begin(); it!=indices.end();) {
+                auto it1 = it;
+                for (auto it2=it1+1; it2!=indices.end() && *it2==*it1+1; it1=it2++);
+                result.push_back(Range(*it,*it1));
+                it = it1+1;
+            }
+            return result;
+        }
+
+        //  Triangles are always contiguous as they are never shared between meshes.
+
+        Range triangles_range() const { return Range(triangles().front().index(),triangles().back().index()); }
 
         /// \brief Get the triangles adjacent to vertex \param V .
 
